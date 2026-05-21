@@ -17,3 +17,81 @@ If you are developing a production application, we recommend using TypeScript wi
 # mtnjava
 
 https://dylanjdev.github.io/mtnjava/
+
+## Online Ordering + Square Checkout Prep
+
+The app now includes an Online Ordering section with:
+
+- Drink + size selection
+- Flavor and sugar-free flavor add-ons
+- Cart + totals
+- Checkout button that posts order data to a backend checkout endpoint
+
+### Frontend Environment Variables
+
+Create a `.env` file in the project root:
+
+```bash
+VITE_SQUARE_CHECKOUT_ENDPOINT=http://localhost:8787/api/square/checkout
+VITE_SQUARE_LOCATION_ID=YOUR_SQUARE_LOCATION_ID
+```
+
+### Expected Backend Response
+
+The frontend sends a `POST` request to `VITE_SQUARE_CHECKOUT_ENDPOINT` and expects:
+
+```json
+{
+	"checkoutUrl": "https://square.link/u/..."
+}
+```
+
+or
+
+```json
+{
+	"url": "https://square.link/u/..."
+}
+```
+
+If no endpoint is configured, checkout is blocked with an on-screen setup message.
+
+### Payload Shape Sent To Backend
+
+```json
+{
+	"idempotencyKey": "uuid-or-timestamp",
+	"pickupTime": "ASAP",
+	"customer": {
+		"name": "Pickup Name",
+		"phone": "(423) 300-2993"
+	},
+	"order": {
+		"locationId": "SQUARE_LOCATION_ID",
+		"lineItems": [
+			{
+				"name": "Latte (16oz)",
+				"quantity": "2",
+				"basePriceMoney": {
+					"amount": 485,
+					"currency": "USD"
+				},
+				"modifiers": [
+					{
+						"name": "Flavor: Caramel",
+						"basePriceMoney": {
+							"amount": 30,
+							"currency": "USD"
+						}
+					}
+				],
+				"note": "extra hot"
+			}
+		]
+	},
+	"redirectUrls": {
+		"success": "https://your-site.com/?checkout=success",
+		"cancel": "https://your-site.com/?checkout=cancelled"
+	}
+}
+```
